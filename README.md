@@ -2,9 +2,14 @@
 
 Solana memecoin trading system focused on Pump.fun graduation momentum trades.
 
-## Status: Phase 0 — Paper Trading & Validation
+## Status: Phase 0 — Data Collection (Live)
 
-No capital deployed. Observing and collecting data on Pump.fun graduation events to validate the strategy before risking money.
+**Started:** March 27, 2026
+**Server:** Hetzner (root@188.34.136.239)
+**Dashboard:** [probodds.com/collector/degen](https://probodds.com/collector/degen)
+**API:** [api.probodds.com/degen/status](https://api.probodds.com/degen/status)
+
+Graduation observer and price tracker are running on the Hetzner server, collecting data on Pump.fun token graduations and their post-graduation price action. No capital deployed.
 
 **Previous project:** Lost $1,288 on Polymarket over 12 strategy iterations. Key lesson learned: validate strategy with real data BEFORE deploying capital. This project starts with observation, not code.
 
@@ -51,24 +56,36 @@ Monitor Pump.fun for tokens that reach $69K market cap ("graduation"), triggerin
 ## Project Structure
 
 ```
+.github/
+  copilot-instructions.md   Project context, rules, API facts
 docs/
-  research.md       Full research & analysis (market data, strategies, risks)
+  research.md               Full research & analysis
+  degen.md                  Memecoin infrastructure concepts
+  progress-log.md           Daily progress & decisions
 scripts/
-  (Phase 3)         Automation scripts (after strategy validation)
-data/
-  (local only)      Paper trade logs, observation data
+  observe_graduations.py    Pump.fun graduation detector (→ JSONL)
+  track_prices.py           Post-graduation price tracker (DexScreener → JSONL)
+  status_api.py             FastAPI dashboard status endpoint (port 8004)
+  snapshot.py               One-shot current graduated tokens view
+  start.sh                  Server start script (all 3 processes)
+data/                       (server only, gitignored)
+  graduations_{date}.jsonl  Detected graduation events
+  price_tracking_{date}.jsonl Price checkpoints (1m/5m/10m/30m)
 ```
 
 ## Documentation
 
 - [Full Research & Analysis](docs/research.md) — Market overview, platform landscape, 5 strategy evaluations, risk analysis, detailed plan
 - [Degen Trading Concepts](docs/degen.md) — Background on memecoin infrastructure, MEV, bonding curves, AI agents
+- [Progress Log](docs/progress-log.md) — Daily progress, decisions, data snapshots
 
 ## Tools
 
 | Tool | Purpose | Phase |
 |------|---------|-------|
-| [GMGN.AI](https://gmgn.ai) | Graduation scanner, security checks, wallet tracking | Phase 0+ |
+| [Pump.fun API](https://frontend-api-v3.pump.fun) | Graduation detection (primary data source) | Phase 0+ |
+| [DexScreener API](https://api.dexscreener.com) | Token price data (replaces Jupiter v2) | Phase 0+ |
+| [GMGN.AI](https://gmgn.ai) | Manual graduation scanning, security checks | Phase 1+ |
 | [Phantom](https://phantom.app) | Solana wallet | Phase 1+ |
 | [Banana Gun](https://t.me/BananaGunSniper_bot) | Trade execution with MEV protection | Phase 1+ |
 | [RugCheck](https://rugcheck.xyz) | Pre-trade security audit | Phase 0+ |
