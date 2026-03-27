@@ -28,12 +28,14 @@ def curl_json(url, timeout=10):
         return None
 
 
-def get_jupiter_price(mint):
-    data = curl_json(f"https://api.jup.ag/price/v2?ids={mint}")
+def get_dexscreener_price(mint):
+    data = curl_json(f"https://api.dexscreener.com/latest/dex/tokens/{mint}")
     if not data:
         return None
-    token = data.get("data", {}).get(mint, {})
-    price = token.get("price")
+    pairs = data.get("pairs")
+    if not pairs:
+        return None
+    price = pairs[0].get("priceUsd")
     return float(price) if price else None
 
 
@@ -75,13 +77,13 @@ def main():
                     try:
                         entry = json.loads(line.strip())
                         mint = entry.get("mint", "")
-                        if mint and mint not in tracking and entry.get("event") == "new_pool":
+                        if mint and mint not in tracking and entry.get("event") == "graduation":
                             tracking[mint] = {
                                 "symbol": entry.get("symbol", "?"),
                                 "name": entry.get("name", "?"),
                                 "pool_id": entry.get("pool_id", ""),
                                 "first_seen": entry.get("ts", ""),
-                                "first_price": entry.get("jup_price"),
+                                "first_price": entry.get("dex_price"),
                                 "first_tvl": entry.get("tvl", 0),
                                 "prices": [],
                                 "checkpoints": {},  # 1m, 5m, 10m, 30m
@@ -113,7 +115,7 @@ def main():
                 active_tokens.append((mint, info, elapsed_min))
             
             for mint, info, elapsed_min in active_tokens:
-                price = get_jupiter_price(mint)
+                price = get_dexscreener_price(mint)
                 
                 if price is not None:
                     info["prices"].append({

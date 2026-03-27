@@ -61,14 +61,17 @@ def get_all_recent_tokens(limit=50):
     return data
 
 
-def get_jupiter_price(mint_address):
-    """Get current token price from Jupiter Price API."""
-    url = f"https://api.jup.ag/price/v2?ids={mint_address}"
+def get_dexscreener_price(mint_address):
+    """Get current token price from DexScreener API."""
+    url = f"https://api.dexscreener.com/latest/dex/tokens/{mint_address}"
     data = curl_json(url)
     if not data:
         return None
-    token_data = data.get("data", {}).get(mint_address, {})
-    price = token_data.get("price")
+    pairs = data.get("pairs")
+    if not pairs:
+        return None
+    # Use the first (highest liquidity) pair
+    price = pairs[0].get("priceUsd")
     return float(price) if price else None
 
 
@@ -135,8 +138,8 @@ def main():
                 has_telegram = bool(t.get("telegram"))
                 has_website = bool(t.get("website"))
 
-                # Get Jupiter price
-                jup_price = get_jupiter_price(mint)
+                # Get DexScreener price
+                dex_price = get_dexscreener_price(mint)
 
                 # Get more details
                 detail = get_token_detail(mint)
@@ -151,7 +154,7 @@ def main():
                     "symbol": symbol,
                     "name": name,
                     "mcap": mcap,
-                    "jup_price": jup_price,
+                    "dex_price": dex_price,
                     "has_twitter": has_twitter,
                     "has_telegram": has_telegram,
                     "has_website": has_website,
