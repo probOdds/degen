@@ -1,0 +1,36 @@
+# Build / Dependencies
+node_modules/
+target/
+dist/
+.turbo/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+
+# Data (local observations, not committed)
+data/
+
+# Logs
+*.log
