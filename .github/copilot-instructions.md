@@ -1,11 +1,20 @@
 # Degen — Copilot Instructions
 
 ## Project Context
-Solana memecoin graduation scanner. Monitors Pump.fun for tokens that graduate (reach $69K mcap, auto-migrate to Raydium/PumpSwap) and trades the post-migration momentum. Currently in **Phase 0 (observation / paper trading)** — collecting data on Pump.fun graduations on the Hetzner server.
+Solana memecoin graduation scanner. Monitored Pump.fun for tokens approaching graduation ($69K mcap) on the bonding curve. **Project SHELVED April 11, 2026** — no executable edge found after 16 days of data collection and live trading.
 
-**Previous experience:** Lost $1,288 on Polymarket over 12 strategy iterations (March 2026). The fundamental lesson: NEVER deploy capital before validating strategy with real data. NEVER build infrastructure before proving the edge exists.
+**Previous experience:** Lost $1,288 on Polymarket over 12 strategy iterations (March 2026). Degen Phase 1: net negative on live trades (small losses, $5/trade sizing).
 
-**STATUS (March 27, 2026):** Phase 0 live. Graduation observer + price tracker running on Hetzner server (root@188.34.136.239). Status API on port 8004. Dashboard page at probodds.com/collector/degen. Collecting graduation events and post-graduation price action.
+**STATUS (April 11, 2026):** Project shelved. Observer processes still running passively on Hetzner. No capital deployed. Telegram alerts still active but informational only.
+
+## KEY FINDINGS (16 days of data, 1,372 tokens tracked)
+
+1. **Post-graduation "buy every grad" strategy: NO EDGE** — 7.4% TP hit rate (need >30%), post-grad is a coin flip (48% TP / 48% SL)
+2. **Pre-graduation bonding curve strategy at $30K: MARGINAL** — 50% graduation rate (n=56), breakeven=43.5%, theoretical EV=+$0.75/trade
+3. **Live trading at $30K threshold: NET NEGATIVE** — execution costs (slippage, gas, timing) eliminated the thin theoretical edge
+4. **75% of graduating tokens go $30K→$69K in <5 minutes** — manual execution cannot capture the fast ones, biasing toward worse outcomes
+5. **Social signals (Twitter/Telegram/Website) have ZERO predictive value** for graduation or post-graduation performance
+6. **Data-first approach was correct** — prevented large losses. Total degen losses were small ($5/trade sizing)
 
 ## CRITICAL RULES (learned from $1,288 in losses)
 

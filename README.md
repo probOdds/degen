@@ -2,16 +2,35 @@
 
 Solana memecoin trading system focused on Pump.fun graduation momentum trades.
 
-## Status: Phase 0 — Data Collection (Live)
+## Status: SHELVED — No Executable Edge Found
 
-**Started:** March 27, 2026
-**Server:** Hetzner (root@188.34.136.239)
-**Dashboard:** [probodds.com/collector/degen](https://probodds.com/collector/degen)
-**API:** [api.probodds.com/degen/status](https://api.probodds.com/degen/status)
+**Duration:** March 27 – April 11, 2026 (16 days)
+**Outcome:** No profitable strategy identified after thorough data collection and live trading validation.
 
-Graduation observer and price tracker are running on the Hetzner server, collecting data on Pump.fun token graduations and their post-graduation price action. No capital deployed.
+### What We Found
 
-**Previous project:** Lost $1,288 on Polymarket over 12 strategy iterations. Key lesson learned: validate strategy with real data BEFORE deploying capital. This project starts with observation, not code.
+Over 14 days, we tracked **1,372 unique tokens** on the Pump.fun bonding curve and observed their outcomes:
+
+| Entry Threshold | Tokens Resolved | Graduated | Rate | Breakeven | Viable? |
+|:--|:--|:--|:--|:--|:--|
+| $5K | 1,352 | 41 | 3.0% | 7.2% | No |
+| $10K | 766 | 40 | 5.2% | 14.5% | No |
+| $20K | 308 | 38 | 12.3% | 29.0% | No |
+| **$30K** | **56** | **28** | **50.0%** | **43.5%** | **Marginal** |
+
+The $30K threshold showed the only positive theoretical EV (+$0.75/trade), but this did not survive real-world execution. Live Phase 1 trading was **net negative** — slippage, gas, and the inability to catch fast-graduating tokens (75% go $30K→$69K in <5 minutes) eliminated the thin edge.
+
+### Key Lessons
+1. **Data-first approach was correct** — 16 days of observation before risking capital prevented large losses
+2. **Theoretical EV ≠ executable EV** — thin edges get destroyed by friction
+3. **Social signals have zero predictive value** for graduation or post-graduation performance
+4. **Post-graduation momentum is a coin flip** — 48% hit +30% TP, 48% hit -15% SL
+5. **Manual execution cannot capture fast-moving tokens** — fundamental speed disadvantage
+
+### What Still Runs
+Observer processes remain on Hetzner (low resource usage). Data collects passively. Telegram alerts fire on $30K+ bonding curve crossings.
+
+**Previous project:** Lost $1,288 on Polymarket over 12 strategy iterations (March 2026).
 
 ## Strategy: Graduation Scanner
 

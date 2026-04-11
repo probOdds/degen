@@ -81,12 +81,13 @@ def _read_jsonl(path: Path) -> list[dict]:
     return entries
 
 
-def _get_today_files() -> tuple[Path, Path]:
-    """Get today's graduation and price tracking files."""
+def _get_today_files() -> tuple[Path, Path, Path]:
+    """Get today's graduation, price tracking, and pre-grad files."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return (
         DATA_DIR / f"graduations_{today}.jsonl",
         DATA_DIR / f"price_tracking_{today}.jsonl",
+        DATA_DIR / f"pregrad_{today}.jsonl",
     )
 
 
@@ -125,11 +126,12 @@ def health():
 @app.get("/status")
 def status():
     now = datetime.now(timezone.utc)
-    grad_file, price_file = _get_today_files()
+    grad_file, price_file, pregrad_file = _get_today_files()
 
     # Process status
     observer = _find_process("observe_graduations.py")
     tracker = _find_process("track_prices.py")
+    pregrad_observer = _find_process("observe_pregrad.py")
 
     # Today's graduation data
     grads = _read_jsonl(grad_file)
@@ -142,11 +144,21 @@ def status():
     all_files = _all_data_files()
     total_grads = 0
     total_price_entries = 0
+    total_pregrad_entries = 0
     for f in all_files:
         if f["name"].startswith("graduations_"):
             total_grads += f["lines"]
         elif f["name"].startswith("price_tracking_"):
             total_price_entries += f["lines"]
+        elif f["name"].startswith("pregrad_"):
+            total_pregrad_entries += f["lines"]
+
+    # Today's pre-grad data
+    pregrad_entries = _read_jsonl(pregrad_file)
+    pregrad_thresholds = [e for e in pregrad_entries if e.get("event") == "threshold_crossed"]
+    pregrad_graduated = [e for e in pregrad_entries if e.get("event") == "graduated"]
+    pregrad_died = [e for e in pregrad_entries if e.get("event") == "died"]
+    recent_pregrad = pregrad_entries[-5:] if pregrad_entries else []
 
     # Latest graduation age
     latest_grad_age = None
@@ -168,17 +180,39 @@ def status():
                 "status": "running" if tracker else "stopped",
                 **(tracker or {}),
             },
+            "pregrad_observer": {
+                "status": "running" if pregrad_observer else "stopped",
+                **(pregrad_observer or {}),
+            },
         },
         "today": {
             "graduations": len(grads),
             "price_checkpoints": len(price_entries),
             "graduation_file": _file_stats(grad_file),
             "price_file": _file_stats(price_file),
+            "pregrad_file": _file_stats(pregrad_file),
             "latest_grad_age_seconds": latest_grad_age,
+        },
+        "pregrad": {
+            "threshold_crossings": len(pregrad_thresholds),
+            "graduated": len(pregrad_graduated),
+            "died": len(pregrad_died),
+            "recent_events": [
+                {
+                    "ts": e.get("ts", ""),
+                    "event": e.get("event", ""),
+                    "symbol": e.get("symbol", "?"),
+                    "threshold": e.get("threshold"),
+                    "mcap": e.get("mcap") or e.get("final_mcap"),
+                    "mint": e.get("mint", ""),
+                }
+                for e in recent_pregrad
+            ],
         },
         "totals": {
             "total_graduations": total_grads,
             "total_price_entries": total_price_entries,
+            "total_pregrad_entries": total_pregrad_entries,
             "data_files": len(all_files),
             "days_collected": len(
                 [f for f in all_files if f["name"].startswith("graduations_")]
