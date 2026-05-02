@@ -26,9 +26,8 @@ from pathlib import Path
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
 
-# Telegram alerts — reuses the probodds bot
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+# Telegram alerts — sent via the central probodds-bot service
+PROBODDS_BOT_URL = os.environ.get("PROBODDS_BOT_URL", "http://127.0.0.1:8011")
 # Alert when tokens cross this threshold or higher
 ALERT_THRESHOLD = 30000
 
@@ -60,19 +59,15 @@ SNAPSHOT_INTERVAL = 4
 
 
 def send_telegram(message):
-    """Send a Telegram message via the bot API. Non-blocking, best-effort."""
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        return
+    """Send a Telegram message via the central probodds-bot. Best-effort."""
     try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         payload = json.dumps({
-            "chat_id": TELEGRAM_CHAT_ID,
             "text": message,
             "parse_mode": "HTML",
-            "disable_web_page_preview": True,
+            "source": "degen-observer",
         })
         subprocess.run(
-            ["curl", "-s", "-X", "POST", url,
+            ["curl", "-s", "-X", "POST", f"{PROBODDS_BOT_URL}/notify",
              "-H", "Content-Type: application/json",
              "-d", payload],
             capture_output=True, text=True, timeout=10
@@ -176,12 +171,11 @@ def main():
     print(f"  Detail check:     every {DETAIL_CHECK_INTERVAL * POLL_INTERVAL}s")
     print(f"  Snapshot:         every {SNAPSHOT_INTERVAL * POLL_INTERVAL}s")
     print(f"  Max tracking:     {MAX_TRACKING_HOURS}h")
-    tg_status = "ENABLED" if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID else "DISABLED"
+    tg_status = "ENABLED via probodds-bot"
     print(f"  Telegram alerts:  {tg_status} (>= ${ALERT_THRESHOLD/1000:.0f}K)")
     print(f"  Press Ctrl+C to stop\n")
 
-    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-        send_telegram("🟢 <b>Degen Pre-Grad Observer</b> started\nAlerts for tokens crossing $30K+")
+    send_telegram("🟢 <b>Degen Pre-Grad Observer</b> started\nAlerts for tokens crossing $30K+")
 
     tracking = {}
     poll_count = 0
